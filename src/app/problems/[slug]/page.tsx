@@ -21,6 +21,7 @@ async function getProblemBySlug(slug: string): Promise<ProblemData | null> {
             where: eq(testCases.isPublic, true),
             orderBy: [asc(testCases.orderIndex)],
           },
+          benchmarkCases: true,
         },
       });
 
@@ -35,6 +36,11 @@ async function getProblemBySlug(slug: string): Promise<ProblemData | null> {
           starterCode: dbProblem.starterCode,
           functionName: dbProblem.functionName,
           hints: dbProblem.hints || [],
+          optimalBigO: "O(N)",
+          benchmarkCases: (dbProblem.benchmarkCases || []).map((bc) => ({
+            inputSize: bc.inputSize,
+            inputPayload: bc.inputPayload as unknown[],
+          })),
           publicTestCases: (dbProblem.testCases || []).map((tc) => ({
             id: tc.id,
             input: tc.input as unknown[],
@@ -64,6 +70,11 @@ async function getProblemBySlug(slug: string): Promise<ProblemData | null> {
     starterCode: seed.starterCode,
     functionName: seed.functionName,
     hints: seed.hints || [],
+    optimalBigO: "O(N)",
+    benchmarkCases: (seed.benchmarkCases || []).map((bc) => ({
+      inputSize: bc.inputSize,
+      inputPayload: bc.inputPayload as unknown[],
+    })),
     publicTestCases: seed.testCases
       .filter((tc) => tc.isPublic)
       .map((tc, idx) => ({
@@ -89,7 +100,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   return {
     title: `${problem.title} | Dev Arena`,
-    description: `Solve ${problem.title} (${problem.difficulty}) with zero-lag in-browser Web Worker execution and instant test feedback.`,
+    description: `Solve ${problem.title} (${problem.difficulty}) with zero-lag in-browser Web Worker execution, AST code quality inspection, and instant test feedback.`,
   };
 }
 

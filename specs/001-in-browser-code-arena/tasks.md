@@ -189,18 +189,18 @@ Every phase in this document strictly adheres to the **Dev Arena Constitution (v
 
 ### Phase 5 Workflow & Checklist
 
-- [ ] T049 Launch dedicated Phase 5 subagent for User Story 3
-- [ ] T050 [P] [US3] Author unit tests for AST loop depth and recursion scanner in tests/unit/ast-analyzer.test.ts (TDD Red)
-- [ ] T051 [P] [US3] Author unit tests for empirical multi-N curve fitting in tests/unit/complexity-profiler.test.ts (TDD Red: tests linear vs quadratic growth ratios)
-- [ ] T052 [US3] Implement AST analysis engine in src/lib/analysis/ast-analyzer.ts using @babel/parser and @babel/traverse
-- [ ] T053 [US3] Implement empirical benchmark profiler in src/lib/analysis/complexity-profiler.ts running inputs of $N=10, 100, 1000, 10000$
-- [ ] T054 [P] [US3] Implement Monaco marker synchronizer in src/components/editor/monaco-markers.ts translating AST syntax errors and warnings to editor underlines
-- [ ] T055 [P] [US3] Implement ComplexityCard component in src/components/analysis/ComplexityCard.tsx with empirical runtime chart
-- [ ] T056 [P] [US3] Implement AstWarningsList component in src/components/analysis/AstWarningsList.tsx showing code quality tips
-- [ ] T057 [US3] Integrate analysis panel into problem workspace in src/app/problems/[slug]/page.tsx
-- [ ] T058 Verify all tests pass (`bun test tests/unit/ast-analyzer.test.ts tests/unit/complexity-profiler.test.ts`)
-- [ ] T059 Spawn review subagent to audit AST parser performance on large inputs and accuracy of curve fitting heuristics
-- [ ] T060 Execute Phase 5 conventional commit: `feat(analysis): implement static AST inspection and empirical Big-O profiler`
+- [X] T049 Launch dedicated Phase 5 subagent for User Story 3
+- [X] T050 [P] [US3] Author unit tests for AST loop depth and recursion scanner in tests/unit/ast-analyzer.test.ts (TDD Red)
+- [X] T051 [P] [US3] Author unit tests for empirical multi-N curve fitting in tests/unit/complexity-profiler.test.ts (TDD Red: tests linear vs quadratic growth ratios)
+- [X] T052 [US3] Implement AST analysis engine in src/lib/analysis/ast-analyzer.ts using @babel/parser and @babel/traverse
+- [X] T053 [US3] Implement empirical benchmark profiler in src/lib/analysis/complexity-profiler.ts running inputs of $N=10, 100, 1000, 10000$
+- [X] T054 [P] [US3] Implement Monaco marker synchronizer in src/components/editor/monaco-markers.ts translating AST syntax errors and warnings to editor underlines
+- [X] T055 [P] [US3] Implement ComplexityCard component in src/components/analysis/ComplexityCard.tsx with empirical runtime chart
+- [X] T056 [P] [US3] Implement AstWarningsList component in src/components/analysis/AstWarningsList.tsx showing code quality tips
+- [X] T057 [US3] Integrate analysis panel into problem workspace in src/app/problems/[slug]/page.tsx
+- [X] T058 Verify all tests pass (`bun test tests/unit/ast-analyzer.test.ts tests/unit/complexity-profiler.test.ts`)
+- [X] T059 Spawn review subagent to audit AST parser performance on large inputs and accuracy of curve fitting heuristics
+- [X] T060 Execute Phase 5 conventional commit: `feat(analysis): implement static AST inspection and empirical Big-O profiler`
 
 ---
 

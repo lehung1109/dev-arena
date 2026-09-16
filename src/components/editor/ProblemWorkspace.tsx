@@ -27,7 +27,17 @@ import {
 } from "@/components/editor/SubmissionModal";
 import { WorkerRunnerManager } from "@/lib/runner/WorkerRunnerManager";
 import { sanitizeStackTrace } from "@/lib/runner/error-sanitizer";
-import type { RunCodeResponse, TestCasePayload } from "@/types/runner";
+import { analyzeAST, type ExtendedASTAnalysisMetrics } from "@/lib/analysis/ast-analyzer";
+import {
+  runBenchmarkSuite,
+  estimateComplexity,
+} from "@/lib/analysis/complexity-profiler";
+import type {
+  RunCodeResponse,
+  TestCasePayload,
+  BenchmarkPoint,
+  ASTAnalysisMetrics,
+} from "@/types/runner";
 
 export interface ProblemData {
   id: string;
@@ -40,6 +50,8 @@ export interface ProblemData {
   functionName: string;
   hints: string[];
   publicTestCases: TestCasePayload[];
+  benchmarkCases?: Array<{ inputSize: number; inputPayload: unknown[] }>;
+  optimalBigO?: string;
 }
 
 interface ProblemWorkspaceProps {
@@ -58,6 +70,15 @@ export const ProblemWorkspace: React.FC<ProblemWorkspaceProps> = ({
   >("description");
   const [openHints, setOpenHints] = useState<Record<number, boolean>>({});
 
+  // AST Analysis & Complexity Profiling State
+  const [astMetrics, setAstMetrics] = useState<ExtendedASTAnalysisMetrics | null>(null);
+  const [benchmarkPoints, setBenchmarkPoints] = useState<BenchmarkPoint[]>([]);
+  const [estimatedBigO, setEstimatedBigO] = useState<string | undefined>(undefined);
+  const [complexityConfidence, setComplexityConfidence] = useState<number>(0.85);
+  const [complexityExplanation, setComplexityExplanation] = useState<string | undefined>(undefined);
+  const [isBenchmarking, setIsBenchmarking] = useState(false);
+  const [bottomTab, setBottomTab] = useState<"testcase" | "result" | "analysis">("testcase");
+
   // Submissions state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalData, setModalData] = useState<SubmissionModalData | null>(null);
@@ -69,12 +90,27 @@ export const ProblemWorkspace: React.FC<ProblemWorkspaceProps> = ({
 
   const runnerRef = useRef<WorkerRunnerManager | null>(null);
 
+  // Initialize WorkerRunnerManager
   useEffect(() => {
     runnerRef.current = new WorkerRunnerManager();
     return () => {
       runnerRef.current?.dispose();
     };
   }, []);
+
+  // Perform continuous static AST inspection with 200ms debounce as user edits code
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      try {
+        const metrics = analyzeAST(code);
+        setAstMetrics(metrics);
+      } catch (err) {
+        console.warn("AST static analysis error:", err);
+      }
+    }, 200);
+
+    return () => clearTimeout(timer);
+  }, [code]);
 
   const fetchSubmissions = async () => {
     setIsLoadingSubmissions(true);
@@ -91,11 +127,39 @@ export const ProblemWorkspace: React.FC<ProblemWorkspaceProps> = ({
     }
   };
 
+  const runBenchmarks = async () => {
+    if (!problem.benchmarkCases || problem.benchmarkCases.length === 0) return;
+    setIsBenchmarking(true);
+    try {
+      const suite = await runBenchmarkSuite({
+        code,
+        functionName: problem.functionName,
+        benchmarkCases: problem.benchmarkCases,
+        timeoutMs: 2000,
+      });
+      setBenchmarkPoints(suite.benchmarkPoints);
+      setEstimatedBigO(suite.complexity.estimatedBigO);
+      setComplexityConfidence(suite.complexity.confidence);
+      setComplexityExplanation(suite.complexity.explanation);
+    } catch (err) {
+      console.warn("Benchmarking error:", err);
+    } finally {
+      setIsBenchmarking(false);
+    }
+  };
+
   const handleRun = async () => {
     if (isRunning || isSubmitting || !runnerRef.current) return;
 
     setIsRunning(true);
+    setBottomTab("result");
+
+    // 1. Static AST analysis
+    const currentAst = analyzeAST(code);
+    setAstMetrics(currentAst);
+
     try {
+      // 2. Execute public test cases
       const response = await runnerRef.current.runCode({
         action: "RUN",
         code,
@@ -103,6 +167,30 @@ export const ProblemWorkspace: React.FC<ProblemWorkspaceProps> = ({
         testCases: problem.publicTestCases,
         timeoutMs: 2000,
       });
+
+      // 3. Run empirical multi-N benchmarks if available
+      if (problem.benchmarkCases && problem.benchmarkCases.length > 0) {
+        setIsBenchmarking(true);
+        try {
+          const suite = await runBenchmarkSuite({
+            code,
+            functionName: problem.functionName,
+            benchmarkCases: problem.benchmarkCases,
+            timeoutMs: 2000,
+          });
+          setBenchmarkPoints(suite.benchmarkPoints);
+          setEstimatedBigO(suite.complexity.estimatedBigO);
+          setComplexityConfidence(suite.complexity.confidence);
+          setComplexityExplanation(suite.complexity.explanation);
+
+          response.benchmarkPoints = suite.benchmarkPoints;
+          response.estimatedBigO = suite.complexity.estimatedBigO as any;
+        } finally {
+          setIsBenchmarking(false);
+        }
+      }
+
+      response.astMetrics = currentAst;
       setRunResponse(response);
     } catch (err: any) {
       const sanitized = sanitizeStackTrace(err?.message || String(err), 1);
@@ -112,6 +200,7 @@ export const ProblemWorkspace: React.FC<ProblemWorkspaceProps> = ({
         totalDurationMs: 0,
         passedTestsCount: 0,
         totalTestsCount: problem.publicTestCases.length,
+        astMetrics: currentAst,
         results: problem.publicTestCases.map((tc) => ({
           testCaseId: tc.id,
           passed: false,
@@ -134,8 +223,13 @@ export const ProblemWorkspace: React.FC<ProblemWorkspaceProps> = ({
     if (isRunning || isSubmitting || !runnerRef.current) return;
 
     setIsSubmitting(true);
+
+    // 1. Static AST analysis
+    const currentAst = analyzeAST(code);
+    setAstMetrics(currentAst);
+
     try {
-      // 1. Fetch all test cases (public + hidden)
+      // 2. Fetch all test cases (public + hidden)
       const tcRes = await fetch(
         `/api/problems/${problem.slug}/test-cases?scope=all`
       );
@@ -145,7 +239,7 @@ export const ProblemWorkspace: React.FC<ProblemWorkspaceProps> = ({
       const tcData = await tcRes.json();
       const allTestCases: TestCasePayload[] = tcData.testCases || [];
 
-      // 2. Run full test suite in WorkerRunnerManager
+      // 3. Run full test suite in WorkerRunnerManager
       const evalResponse = await runnerRef.current.runCode({
         action: "SUBMIT",
         code,
@@ -154,7 +248,30 @@ export const ProblemWorkspace: React.FC<ProblemWorkspaceProps> = ({
         timeoutMs: 2000,
       });
 
-      // 3. Attach input payloads and sanitize errors for test results detail
+      // 4. Run benchmarks for Big-O estimation
+      let currentBigO = estimatedBigO;
+      let currentPoints = benchmarkPoints;
+      const bCases = problem.benchmarkCases || tcData.benchmarkCases || [];
+      if (bCases.length > 0) {
+        try {
+          const suite = await runBenchmarkSuite({
+            code,
+            functionName: problem.functionName,
+            benchmarkCases: bCases,
+            timeoutMs: 2000,
+          });
+          currentPoints = suite.benchmarkPoints;
+          currentBigO = suite.complexity.estimatedBigO;
+          setBenchmarkPoints(currentPoints);
+          setEstimatedBigO(currentBigO);
+          setComplexityConfidence(suite.complexity.confidence);
+          setComplexityExplanation(suite.complexity.explanation);
+        } catch (bErr) {
+          console.warn("Benchmark profiling during submit:", bErr);
+        }
+      }
+
+      // 5. Attach input payloads and sanitize errors for test results detail
       const detailedResults = evalResponse.results.map((r) => {
         const matchingTestCase = allTestCases.find((tc) => tc.id === r.testCaseId);
         const isPublic = matchingTestCase ? matchingTestCase.isPublic : true;
@@ -177,7 +294,7 @@ export const ProblemWorkspace: React.FC<ProblemWorkspaceProps> = ({
         };
       });
 
-      // 4. Post submission record to /api/submissions
+      // 6. Post submission record to /api/submissions
       const submissionPayload = {
         problemId: problem.slug,
         code,
@@ -187,7 +304,7 @@ export const ProblemWorkspace: React.FC<ProblemWorkspaceProps> = ({
         passedTestCases: evalResponse.passedTestsCount,
         totalTestCases: evalResponse.totalTestsCount,
         testResultsDetail: detailedResults,
-        astMetrics: evalResponse.astMetrics,
+        astMetrics: currentAst,
       };
 
       const subRes = await fetch("/api/submissions", {
@@ -198,7 +315,7 @@ export const ProblemWorkspace: React.FC<ProblemWorkspaceProps> = ({
 
       const savedSub = subRes.ok ? await subRes.json() : null;
 
-      // 5. Open SubmissionModal with full results
+      // 7. Open SubmissionModal with full results
       const nextProblemMap: Record<string, string> = {
         "two-sum": "valid-parentheses",
       };
@@ -567,16 +684,27 @@ export const ProblemWorkspace: React.FC<ProblemWorkspaceProps> = ({
                 value={code}
                 onChange={setCode}
                 language="javascript"
+                astMetrics={astMetrics}
               />
             </div>
           </div>
 
-          {/* Bottom of right column: Output Panel */}
+          {/* Bottom of right column: Output & Analysis Panel */}
           <div className="flex-1 h-[45%] overflow-hidden">
             <OutputPanel
               response={runResponse}
               isRunning={isRunning}
               testCases={problem.publicTestCases}
+              astMetrics={astMetrics}
+              benchmarkPoints={benchmarkPoints}
+              estimatedBigO={estimatedBigO}
+              optimalBigO={problem.optimalBigO || "O(N)"}
+              complexityConfidence={complexityConfidence}
+              complexityExplanation={complexityExplanation}
+              isBenchmarking={isBenchmarking}
+              onRunBenchmark={runBenchmarks}
+              activeTab={bottomTab}
+              onTabChange={setBottomTab}
             />
           </div>
         </div>

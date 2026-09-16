@@ -1,8 +1,10 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import dynamic from "next/dynamic";
 import { Loader2 } from "lucide-react";
+import type { ASTAnalysisMetrics } from "@/types/runner";
+import { updateEditorMarkers, clearEditorMarkers } from "./monaco-markers";
 
 // Dynamically import Monaco Editor to prevent SSR window reference errors
 const Editor = dynamic(() => import("@monaco-editor/react"), {
@@ -21,6 +23,8 @@ interface MonacoCodeEditorProps {
   language?: string;
   readOnly?: boolean;
   height?: string | number;
+  astMetrics?: ASTAnalysisMetrics | null;
+  onMount?: (editor: any, monaco: any) => void;
 }
 
 export const MonacoCodeEditor: React.FC<MonacoCodeEditorProps> = ({
@@ -29,12 +33,39 @@ export const MonacoCodeEditor: React.FC<MonacoCodeEditorProps> = ({
   language = "javascript",
   readOnly = false,
   height = "100%",
+  astMetrics = null,
+  onMount,
 }) => {
   const [isMounted, setIsMounted] = useState(false);
+  const editorRef = useRef<any>(null);
+  const monacoRef = useRef<any>(null);
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
+
+  const handleEditorDidMount = (editor: any, monaco: any) => {
+    editorRef.current = editor;
+    monacoRef.current = monaco;
+
+    if (onMount) {
+      onMount(editor, monaco);
+    }
+
+    if (astMetrics) {
+      updateEditorMarkers(monaco, editor, astMetrics);
+    }
+  };
+
+  useEffect(() => {
+    if (editorRef.current && monacoRef.current) {
+      if (astMetrics) {
+        updateEditorMarkers(monacoRef.current, editorRef.current, astMetrics);
+      } else {
+        clearEditorMarkers(monacoRef.current, editorRef.current);
+      }
+    }
+  }, [astMetrics]);
 
   if (!isMounted) {
     return (
@@ -53,6 +84,7 @@ export const MonacoCodeEditor: React.FC<MonacoCodeEditorProps> = ({
         value={value}
         theme="vs-dark"
         onChange={(val) => onChange(val || "")}
+        onMount={handleEditorDidMount}
         options={{
           fontSize: 14,
           fontFamily: "'Fira Code', 'Cascadia Code', Consolas, 'Courier New', monospace",
