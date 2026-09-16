@@ -70,9 +70,13 @@ export default function RootLayout({
                 <Flame className="w-4 h-4 text-orange-400" />
                 <span className="font-semibold text-orange-300">0</span> Day Streak
               </div>
-              <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-900 border border-slate-800 text-xs text-slate-300">
+              <Link
+                href="/profile/coder_99"
+                className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-900 border border-slate-800 text-xs text-slate-300 hover:border-blue-500/50 hover:bg-slate-850 transition-colors"
+                title="View Profile & Rating"
+              >
                 <span className="text-blue-400 font-semibold">1200</span> Rating
-              </div>
+              </Link>
               <Link
                 href="/problems"
                 className="inline-flex items-center gap-2 px-4 py-2 text-xs sm:text-sm font-semibold text-white bg-blue-600 hover:bg-blue-500 rounded-lg transition-colors shadow-md shadow-blue-600/20"

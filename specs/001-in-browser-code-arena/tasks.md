@@ -298,18 +298,18 @@ Every phase in this document strictly adheres to the **Dev Arena Constitution (v
 
 ### Phase 8 Workflow & Checklist
 
-- [ ] T084 Launch dedicated Phase 8 subagent for User Story 6
-- [ ] T085 [P] [US6] Author unit tests for rating adjustment algorithm and penalty scoring in tests/unit/rating-engine.test.ts (TDD Red)
-- [ ] T086 [P] [US6] Author contract tests for contest listing and leaderboard API in tests/contract/contests-api.test.ts (TDD Red)
-- [ ] T087 [US6] Implement rating calculation and scoring logic in src/lib/contests/rating-engine.ts
-- [ ] T088 [US6] Implement contest endpoints in src/app/api/contests/route.ts and src/app/api/contests/[slug]/leaderboard/route.ts
-- [ ] T089 [P] [US6] Implement Contests list page in src/app/contests/page.tsx showing upcoming, ongoing, and past contests
-- [ ] T090 [US6] Implement live contest arena page with timer and leaderboard in src/app/contests/[slug]/page.tsx
-- [ ] T091 [P] [US6] Implement user public profile and rating history chart in src/app/profile/[username]/page.tsx
-- [ ] T092 [P] [US6] Implement BadgeList component in src/components/profile/BadgeList.tsx displaying streak and contest achievement badges
-- [ ] T093 Verify all tests pass (`bun test tests/unit/rating-engine.test.ts tests/contract/contests-api.test.ts`)
-- [ ] T094 Spawn review subagent to audit contest timer synchronization, penalty calculations, and leaderboard query performance
-- [ ] T095 Execute Phase 8 conventional commit: `feat(contest): implement timed contest arena, rating engine, and achievement badges`
+- [X] T084 Launch dedicated Phase 8 subagent for User Story 6
+- [X] T085 [P] [US6] Author unit tests for rating adjustment algorithm and penalty scoring in tests/unit/rating-engine.test.ts (TDD Red)
+- [X] T086 [P] [US6] Author contract tests for contest listing and leaderboard API in tests/contract/contests-api.test.ts (TDD Red)
+- [X] T087 [US6] Implement rating calculation and scoring logic in src/lib/contests/rating-engine.ts
+- [X] T088 [US6] Implement contest endpoints in src/app/api/contests/route.ts and src/app/api/contests/[slug]/leaderboard/route.ts
+- [X] T089 [P] [US6] Implement Contests list page in src/app/contests/page.tsx showing upcoming, ongoing, and past contests
+- [X] T090 [US6] Implement live contest arena page with timer and leaderboard in src/app/contests/[slug]/page.tsx
+- [X] T091 [P] [US6] Implement user public profile and rating history chart in src/app/profile/[username]/page.tsx
+- [X] T092 [P] [US6] Implement BadgeList component in src/components/profile/BadgeList.tsx displaying streak and contest achievement badges
+- [X] T093 Verify all tests pass (`bun test tests/unit/rating-engine.test.ts tests/contract/contests-api.test.ts`)
+- [X] T094 Spawn review subagent to audit contest timer synchronization, penalty calculations, and leaderboard query performance
+- [X] T095 Execute Phase 8 conventional commit: `feat(contest): implement timed contest arena, rating engine, and achievement badges`
 
 ---
 
