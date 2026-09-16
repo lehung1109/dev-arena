@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db/client";
 import { problems, testCases as testCasesTable } from "@/lib/db/schema";
 import { SEED_PROBLEMS } from "@/lib/db/seeds/seed-problems";
+import { findCatalogProblem } from "@/lib/curriculum/problems-catalog";
 import { eq, asc } from "drizzle-orm";
 
 interface RouteContext {
@@ -66,8 +67,8 @@ export async function GET(request: Request, context: RouteContext) {
       });
     }
 
-    // Fallback: look up in seed problems
-    const seedProblem = SEED_PROBLEMS.find((p) => p.slug === slug);
+    // Fallback: look up in seed problems or extended catalog
+    const seedProblem = SEED_PROBLEMS.find((p) => p.slug === slug) || findCatalogProblem(slug);
     if (!seedProblem) {
       return NextResponse.json(
         { error: `Problem with slug '${slug}' not found` },

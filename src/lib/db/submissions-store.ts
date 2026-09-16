@@ -50,11 +50,15 @@ function getStore(): StoredSubmission[] {
   return globalThis.__dev_arena_submissions;
 }
 
-function getSolvedSet(): Set<string> {
+export function getSolvedSet(): Set<string> {
   if (!globalThis.__dev_arena_solved_problems) {
     globalThis.__dev_arena_solved_problems = new Set<string>();
   }
   return globalThis.__dev_arena_solved_problems;
+}
+
+export function getSolvedProblemIds(): Set<string> {
+  return new Set(getSolvedSet());
 }
 
 export function resolveProblemTitle(problemId: string): string {

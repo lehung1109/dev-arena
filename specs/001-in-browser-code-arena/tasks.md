@@ -227,19 +227,19 @@ Every phase in this document strictly adheres to the **Dev Arena Constitution (v
 
 ### Phase 6 Workflow & Checklist
 
-- [ ] T061 Launch dedicated Phase 6 subagent for User Story 4
-- [ ] T062 [P] [US4] Author unit tests for Skill Tree DAG traversal and prerequisite unlocking in tests/unit/skill-graph.test.ts (TDD Red)
-- [ ] T063 [P] [US4] Author contract tests for GET /api/skills/tree and GET /api/skills/radar in tests/contract/skills-api.test.ts (TDD Red)
-- [ ] T064 [US4] Implement skill graph DAG evaluation logic in src/lib/curriculum/skill-graph.ts
-- [ ] T065 [US4] Implement Skill Tree endpoint in src/app/api/skills/tree/route.ts returning node unlock states for user
-- [ ] T066 [US4] Implement Skill Radar endpoint in src/app/api/skills/radar/route.ts aggregating topic mastery percentages
-- [ ] T067 [P] [US4] Implement interactive DAG visualization component in src/components/curriculum/SkillTreeGraph.tsx with node connections and status badges
-- [ ] T068 [P] [US4] Implement SkillRadarChart component in src/components/curriculum/SkillRadarChart.tsx using SVG/Canvas
-- [ ] T069 [US4] Implement Curriculum Roadmap page in src/app/skills/page.tsx hosting the Skill Tree and Radar view
-- [ ] T070 [US4] Implement Problem Library catalog page in src/app/problems/page.tsx with topic, difficulty, and solved status filters
-- [ ] T071 Verify all tests pass (`bun test tests/unit/skill-graph.test.ts tests/contract/skills-api.test.ts`)
-- [ ] T072 Spawn review subagent to audit DAG cycle prevention, unlock state transitions, and responsive layout
-- [ ] T073 Execute Phase 6 conventional commit: `feat(curriculum): implement DAG skill tree, problem library, and mastery radar chart`
+- [X] T061 Launch dedicated Phase 6 subagent for User Story 4
+- [X] T062 [P] [US4] Author unit tests for Skill Tree DAG traversal and prerequisite unlocking in tests/unit/skill-graph.test.ts (TDD Red)
+- [X] T063 [P] [US4] Author contract tests for GET /api/skills/tree and GET /api/skills/radar in tests/contract/skills-api.test.ts (TDD Red)
+- [X] T064 [US4] Implement skill graph DAG evaluation logic in src/lib/curriculum/skill-graph.ts
+- [X] T065 [US4] Implement Skill Tree endpoint in src/app/api/skills/tree/route.ts returning node unlock states for user
+- [X] T066 [US4] Implement Skill Radar endpoint in src/app/api/skills/radar/route.ts aggregating topic mastery percentages
+- [X] T067 [P] [US4] Implement interactive DAG visualization component in src/components/curriculum/SkillTreeGraph.tsx with node connections and status badges
+- [X] T068 [P] [US4] Implement SkillRadarChart component in src/components/curriculum/SkillRadarChart.tsx using SVG/Canvas
+- [X] T069 [US4] Implement Curriculum Roadmap page in src/app/skills/page.tsx hosting the Skill Tree and Radar view
+- [X] T070 [US4] Implement Problem Library catalog page in src/app/problems/page.tsx with topic, difficulty, and solved status filters
+- [X] T071 Verify all tests pass (`bun test tests/unit/skill-graph.test.ts tests/contract/skills-api.test.ts`)
+- [X] T072 Spawn review subagent to audit DAG cycle prevention, unlock state transitions, and responsive layout
+- [X] T073 Execute Phase 6 conventional commit: `feat(curriculum): implement DAG skill tree, problem library, and mastery radar chart`
 
 ---
 

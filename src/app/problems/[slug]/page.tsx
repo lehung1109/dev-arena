@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { db } from "@/lib/db/client";
 import { problems, testCases } from "@/lib/db/schema";
 import { SEED_PROBLEMS } from "@/lib/db/seeds/seed-problems";
+import { findCatalogProblem } from "@/lib/curriculum/problems-catalog";
 import { eq, asc } from "drizzle-orm";
 import { ProblemWorkspace, type ProblemData } from "@/components/editor/ProblemWorkspace";
 
@@ -57,7 +58,7 @@ async function getProblemBySlug(slug: string): Promise<ProblemData | null> {
   }
 
   // 2. Fallback to seed problem definitions
-  const seed = SEED_PROBLEMS.find((p) => p.slug === slug);
+  const seed = SEED_PROBLEMS.find((p) => p.slug === slug) || findCatalogProblem(slug);
   if (!seed) return null;
 
   return {
