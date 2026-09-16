@@ -74,17 +74,17 @@ Every phase in this document strictly adheres to the **Dev Arena Constitution (v
 
 ### Phase 2 Workflow & Checklist
 
-- [ ] T011 Launch dedicated Phase 2 subagent for database & foundation infrastructure
-- [ ] T012 [P] Author unit test verifying database schema definitions and types in tests/unit/db-client.test.ts (TDD Red)
-- [ ] T013 Implement Drizzle PostgreSQL table schemas in src/lib/db/schema.ts (`users`, `problems`, `test_cases`, `benchmark_cases`, `submissions`, `skill_nodes`, `user_skill_progress`, `contests`, `contest_participations`, `achievement_badges`, `discussion_posts`)
-- [ ] T014 Implement singleton Drizzle client with Neon stateless HTTP driver in src/lib/db/client.ts
-- [ ] T015 [P] Export TypeScript schema types and validation schemas in src/types/db.ts
-- [ ] T016 Implement seed script in src/lib/db/seeds/seed-problems.ts providing foundational problems (Two Sum, Valid Parentheses, Reverse Linked List) and core Skill Nodes
-- [ ] T017 Implement root layout with dark theme, responsive navigation bar, and footer in src/app/layout.tsx
-- [ ] T018 Implement landing hero page showcasing interactive features and algorithm tracks in src/app/page.tsx
-- [ ] T019 Run tests to verify green state (`bun test tests/unit/db-client.test.ts`)
-- [ ] T020 Spawn review subagent to audit schema consistency against data-model.md, test edge cases, and ensure zero lint errors
-- [ ] T021 Execute Phase 2 conventional commit: `feat(db): implement Neon PostgreSQL schema, Drizzle client, and seed dataset`
+- [X] T011 Launch dedicated Phase 2 subagent for database & foundation infrastructure
+- [X] T012 [P] Author unit test verifying database schema definitions and types in tests/unit/db-client.test.ts (TDD Red)
+- [X] T013 Implement Drizzle PostgreSQL table schemas in src/lib/db/schema.ts (`users`, `problems`, `test_cases`, `benchmark_cases`, `submissions`, `skill_nodes`, `user_skill_progress`, `contests`, `contest_participations`, `achievement_badges`, `discussion_posts`)
+- [X] T014 Implement singleton Drizzle client with Neon stateless HTTP driver in src/lib/db/client.ts
+- [X] T015 [P] Export TypeScript schema types and validation schemas in src/types/db.ts
+- [X] T016 Implement seed script in src/lib/db/seeds/seed-problems.ts providing foundational problems (Two Sum, Valid Parentheses, Reverse Linked List) and core Skill Nodes
+- [X] T017 Implement root layout with dark theme, responsive navigation bar, and footer in src/app/layout.tsx
+- [X] T018 Implement landing hero page showcasing interactive features and algorithm tracks in src/app/page.tsx
+- [X] T019 Run tests to verify green state (`bun test tests/unit/db-client.test.ts`)
+- [X] T020 Spawn review subagent to audit schema consistency against data-model.md, test edge cases, and ensure zero lint errors
+- [X] T021 Execute Phase 2 conventional commit: `feat(db): implement Neon PostgreSQL schema, Drizzle client, and seed dataset`
 
 ---
 
