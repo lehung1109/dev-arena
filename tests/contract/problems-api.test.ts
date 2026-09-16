@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { GET } from "@/app/api/problems/[slug]/route";
+import { GET as GET_TEST_CASES } from "@/app/api/problems/[slug]/test-cases/route";
 
 describe("Problems API Contract Tests: GET /api/problems/[slug]", () => {
   it("returns 200 with complete problem details for an existing slug", async () => {
@@ -52,6 +53,63 @@ describe("Problems API Contract Tests: GET /api/problems/[slug]", () => {
     const request = new Request("http://localhost:3000/api/problems/non-existent-slug-xyz");
     const response = await GET(request, {
       params: Promise.resolve({ slug: "non-existent-slug-xyz" }),
+    });
+
+    expect(response.status).toBe(404);
+    const data = await response.json();
+    expect(data).toHaveProperty("error");
+    expect(data.error).toMatch(/not found/i);
+  });
+});
+
+describe("Problems API Contract Tests: GET /api/problems/[slug]/test-cases", () => {
+  it("returns only public test cases when scope is public or omitted", async () => {
+    const request = new Request("http://localhost:3000/api/problems/two-sum/test-cases?scope=public");
+    const response = await GET_TEST_CASES(request, {
+      params: Promise.resolve({ slug: "two-sum" }),
+    });
+
+    expect(response.status).toBe(200);
+    const data = await response.json();
+    expect(data).toHaveProperty("testCases");
+    expect(Array.isArray(data.testCases)).toBe(true);
+    expect(data.testCases.length).toBeGreaterThanOrEqual(1);
+
+    // All returned test cases must be public
+    for (const tc of data.testCases) {
+      expect(tc.isPublic).toBe(true);
+      expect(tc).toHaveProperty("input");
+      expect(tc).toHaveProperty("expectedOutput");
+    }
+
+    expect(data).toHaveProperty("benchmarkCases");
+    expect(Array.isArray(data.benchmarkCases)).toBe(true);
+  });
+
+  it("returns all test cases (public + hidden) when scope=all for submission verification", async () => {
+    const request = new Request("http://localhost:3000/api/problems/two-sum/test-cases?scope=all");
+    const response = await GET_TEST_CASES(request, {
+      params: Promise.resolve({ slug: "two-sum" }),
+    });
+
+    expect(response.status).toBe(200);
+    const data = await response.json();
+    expect(data).toHaveProperty("testCases");
+    expect(Array.isArray(data.testCases)).toBe(true);
+
+    // In SEED_PROBLEMS, two-sum has 3 public and 2 hidden test cases (total 5)
+    expect(data.testCases.length).toBeGreaterThanOrEqual(5);
+
+    const hasHidden = data.testCases.some((tc: any) => tc.isPublic === false);
+    expect(hasHidden).toBe(true);
+    const hasPublic = data.testCases.some((tc: any) => tc.isPublic === true);
+    expect(hasPublic).toBe(true);
+  });
+
+  it("returns 404 when slug does not exist for test-cases endpoint", async () => {
+    const request = new Request("http://localhost:3000/api/problems/unknown-slug/test-cases");
+    const response = await GET_TEST_CASES(request, {
+      params: Promise.resolve({ slug: "unknown-slug" }),
     });
 
     expect(response.status).toBe(404);

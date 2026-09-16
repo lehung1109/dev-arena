@@ -9,6 +9,7 @@ import type {
   WorkerRunnerEvent,
 } from "@/types/runner";
 import { executeUserCode } from "./execute";
+import { sanitizeStackTrace } from "./error-sanitizer";
 
 export class WorkerRunnerManager {
   private worker: Worker | null = null;
@@ -236,6 +237,7 @@ export class WorkerRunnerManager {
           err?.name === "SyntaxError" ||
           /syntax|unexpected token/i.test(err?.message || "");
 
+        const sanitized = sanitizeStackTrace(err, 1);
         const errResp: RunCodeResponse = {
           action,
           verdict: isSyntax ? "SYNTAX_ERROR" : "RUNTIME_ERROR",
@@ -246,7 +248,12 @@ export class WorkerRunnerManager {
             expectedOutput: tc.expectedOutput,
             logs: [],
             executionTimeMs: 0,
-            error: { message: err?.message || String(err) },
+            error: {
+              message: sanitized.message,
+              line: sanitized.line,
+              column: sanitized.column,
+              sanitizedStack: sanitized.cleanStack,
+            },
           })),
           passedTestsCount: 0,
           totalTestsCount: testCases.length,
@@ -283,6 +290,7 @@ export class WorkerRunnerManager {
           return tleResp;
         }
 
+        const sanitized = sanitizeStackTrace(err, 1);
         const errResp: RunCodeResponse = {
           action,
           verdict: "RUNTIME_ERROR",
@@ -295,7 +303,12 @@ export class WorkerRunnerManager {
             expectedOutput: tc.expectedOutput,
             logs: [],
             executionTimeMs: 0,
-            error: { message: err?.message || String(err) },
+            error: {
+              message: sanitized.message,
+              line: sanitized.line,
+              column: sanitized.column,
+              sanitizedStack: sanitized.cleanStack,
+            },
           })),
         };
         this.emit({ type: "COMPLETED", response: errResp });
@@ -368,7 +381,15 @@ export class WorkerRunnerManager {
           logs: [...logs],
           executionTimeMs: Math.round(durationMs * 100) / 100,
           error: executionError
-            ? { message: executionError.message || String(executionError) }
+            ? (() => {
+                const s = sanitizeStackTrace(executionError, 1);
+                return {
+                  message: s.message,
+                  line: s.line,
+                  column: s.column,
+                  sanitizedStack: s.cleanStack,
+                };
+              })()
             : undefined,
         });
       }

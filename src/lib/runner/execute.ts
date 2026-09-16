@@ -4,6 +4,7 @@
  */
 
 import { deepEqual, formatValue } from "./deep-equal";
+import { sanitizeStackTrace } from "./error-sanitizer";
 import type {
   ExecutionVerdict,
   RunCodeRequest,
@@ -25,6 +26,9 @@ export async function executeUserCode(
 
   // 1. Compile and extract target function
   try {
+    if (!/^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(functionName)) {
+      throw new TypeError(`Invalid function name: "${functionName}" is not a valid identifier`);
+    }
     const wrappedCode = `"use strict";\n${code}\n;if (typeof ${functionName} !== "function") { throw new TypeError("${functionName} is not defined or is not a function"); }\nreturn ${functionName};`;
     const compile = new Function(wrappedCode);
     targetFn = compile();
@@ -34,9 +38,12 @@ export async function executeUserCode(
       err?.name === "SyntaxError" ||
       /syntax|unexpected token/i.test(err?.message || "");
 
+    const sanitized = sanitizeStackTrace(err, 1);
     const errorResult = {
-      message: err?.message || String(err),
-      sanitizedStack: err?.stack,
+      message: sanitized.message,
+      line: sanitized.line,
+      column: sanitized.column,
+      sanitizedStack: sanitized.cleanStack,
     };
 
     return {
@@ -126,10 +133,15 @@ export async function executeUserCode(
       logs,
       executionTimeMs: Math.round(durationMs * 100) / 100,
       error: executionError
-        ? {
-            message: executionError.message || String(executionError),
-            sanitizedStack: executionError.stack,
-          }
+        ? (() => {
+            const sanitized = sanitizeStackTrace(executionError, 1);
+            return {
+              message: sanitized.message,
+              line: sanitized.line,
+              column: sanitized.column,
+              sanitizedStack: sanitized.cleanStack,
+            };
+          })()
         : undefined,
     });
   }

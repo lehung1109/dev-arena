@@ -7,6 +7,7 @@ interface EditorHeaderProps {
   problemTitle?: string;
   difficulty?: "EASY" | "MEDIUM" | "HARD";
   isRunning: boolean;
+  isSubmitting?: boolean;
   onRun: () => void;
   onSubmit?: () => void;
   onReset: () => void;
@@ -17,6 +18,7 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
   problemTitle,
   difficulty = "EASY",
   isRunning,
+  isSubmitting = false,
   onRun,
   onSubmit,
   onReset,
@@ -100,11 +102,15 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
           <button
             type="button"
             onClick={onSubmit}
-            disabled={isRunning}
+            disabled={isRunning || isSubmitting}
             className="flex items-center gap-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white px-3.5 py-1.5 text-xs font-semibold shadow-md shadow-blue-600/20 transition-all disabled:opacity-50 active:scale-95"
           >
-            <Send className="h-3.5 w-3.5" />
-            <span>Submit</span>
+            {isSubmitting ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin text-white" />
+            ) : (
+              <Send className="h-3.5 w-3.5" />
+            )}
+            <span>{isSubmitting ? "Submitting..." : "Submit"}</span>
           </button>
         )}
       </div>

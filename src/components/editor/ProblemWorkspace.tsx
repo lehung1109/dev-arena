@@ -6,14 +6,27 @@ import {
   ChevronLeft,
   BookOpen,
   HelpCircle,
+  History,
   Tag,
   ChevronDown,
   ChevronUp,
+  CheckCircle2,
+  XCircle,
+  Clock,
+  AlertTriangle,
+  AlertOctagon,
+  Loader2,
+  Code2,
 } from "lucide-react";
 import { MonacoCodeEditor } from "@/components/editor/MonacoCodeEditor";
 import { EditorHeader } from "@/components/editor/EditorHeader";
 import { OutputPanel } from "@/components/editor/OutputPanel";
+import {
+  SubmissionModal,
+  type SubmissionModalData,
+} from "@/components/editor/SubmissionModal";
 import { WorkerRunnerManager } from "@/lib/runner/WorkerRunnerManager";
+import { sanitizeStackTrace } from "@/lib/runner/error-sanitizer";
 import type { RunCodeResponse, TestCasePayload } from "@/types/runner";
 
 export interface ProblemData {
@@ -38,9 +51,21 @@ export const ProblemWorkspace: React.FC<ProblemWorkspaceProps> = ({
 }) => {
   const [code, setCode] = useState(problem.starterCode);
   const [isRunning, setIsRunning] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [runResponse, setRunResponse] = useState<RunCodeResponse | null>(null);
-  const [activeTab, setActiveTab] = useState<"description" | "hints">("description");
+  const [activeTab, setActiveTab] = useState<
+    "description" | "hints" | "submissions"
+  >("description");
   const [openHints, setOpenHints] = useState<Record<number, boolean>>({});
+
+  // Submissions state
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalData, setModalData] = useState<SubmissionModalData | null>(null);
+  const [submissionsHistory, setSubmissionsHistory] = useState<any[]>([]);
+  const [isLoadingSubmissions, setIsLoadingSubmissions] = useState(false);
+  const [expandedSubmissionId, setExpandedSubmissionId] = useState<string | null>(
+    null
+  );
 
   const runnerRef = useRef<WorkerRunnerManager | null>(null);
 
@@ -51,8 +76,23 @@ export const ProblemWorkspace: React.FC<ProblemWorkspaceProps> = ({
     };
   }, []);
 
+  const fetchSubmissions = async () => {
+    setIsLoadingSubmissions(true);
+    try {
+      const res = await fetch(`/api/submissions?problemId=${problem.slug}`);
+      if (res.ok) {
+        const data = await res.json();
+        setSubmissionsHistory(data.items || []);
+      }
+    } catch (err) {
+      console.error("Failed to load submissions history:", err);
+    } finally {
+      setIsLoadingSubmissions(false);
+    }
+  };
+
   const handleRun = async () => {
-    if (isRunning || !runnerRef.current) return;
+    if (isRunning || isSubmitting || !runnerRef.current) return;
 
     setIsRunning(true);
     try {
@@ -65,6 +105,7 @@ export const ProblemWorkspace: React.FC<ProblemWorkspaceProps> = ({
       });
       setRunResponse(response);
     } catch (err: any) {
+      const sanitized = sanitizeStackTrace(err?.message || String(err), 1);
       setRunResponse({
         action: "RUN",
         verdict: "RUNTIME_ERROR",
@@ -76,11 +117,133 @@ export const ProblemWorkspace: React.FC<ProblemWorkspaceProps> = ({
           passed: false,
           logs: [],
           executionTimeMs: 0,
-          error: { message: err?.message || String(err) },
+          error: {
+            message: sanitized.message,
+            line: sanitized.line,
+            column: sanitized.column,
+            sanitizedStack: sanitized.cleanStack,
+          },
         })),
       });
     } finally {
       setIsRunning(false);
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (isRunning || isSubmitting || !runnerRef.current) return;
+
+    setIsSubmitting(true);
+    try {
+      // 1. Fetch all test cases (public + hidden)
+      const tcRes = await fetch(
+        `/api/problems/${problem.slug}/test-cases?scope=all`
+      );
+      if (!tcRes.ok) {
+        throw new Error("Failed to fetch evaluation test cases");
+      }
+      const tcData = await tcRes.json();
+      const allTestCases: TestCasePayload[] = tcData.testCases || [];
+
+      // 2. Run full test suite in WorkerRunnerManager
+      const evalResponse = await runnerRef.current.runCode({
+        action: "SUBMIT",
+        code,
+        functionName: problem.functionName,
+        testCases: allTestCases,
+        timeoutMs: 2000,
+      });
+
+      // 3. Attach input payloads and sanitize errors for test results detail
+      const detailedResults = evalResponse.results.map((r) => {
+        const matchingTestCase = allTestCases.find((tc) => tc.id === r.testCaseId);
+        const isPublic = matchingTestCase ? matchingTestCase.isPublic : true;
+        let error = r.error;
+        if (error) {
+          const sanitized = sanitizeStackTrace(error.message || "", 1);
+          error = {
+            message: sanitized.message,
+            line: sanitized.line,
+            column: sanitized.column,
+            sanitizedStack: sanitized.cleanStack,
+          };
+        }
+        return {
+          ...r,
+          isPublic,
+          input: isPublic ? matchingTestCase?.input : undefined,
+          expectedOutput: isPublic ? r.expectedOutput : undefined,
+          error,
+        };
+      });
+
+      // 4. Post submission record to /api/submissions
+      const submissionPayload = {
+        problemId: problem.slug,
+        code,
+        status: evalResponse.verdict,
+        runtimeMs: evalResponse.totalDurationMs,
+        memoryBytes: 2048,
+        passedTestCases: evalResponse.passedTestsCount,
+        totalTestCases: evalResponse.totalTestsCount,
+        testResultsDetail: detailedResults,
+        astMetrics: evalResponse.astMetrics,
+      };
+
+      const subRes = await fetch("/api/submissions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(submissionPayload),
+      });
+
+      const savedSub = subRes.ok ? await subRes.json() : null;
+
+      // 5. Open SubmissionModal with full results
+      const nextProblemMap: Record<string, string> = {
+        "two-sum": "valid-parentheses",
+      };
+      const nextSlug = nextProblemMap[problem.slug] || undefined;
+
+      setModalData({
+        id: savedSub?.id,
+        status: evalResponse.verdict,
+        runtimeMs: evalResponse.totalDurationMs,
+        memoryBytes: 2048,
+        passedTestCases: evalResponse.passedTestsCount,
+        totalTestCases: evalResponse.totalTestsCount,
+        testResultsDetail: detailedResults,
+        nextProblemSlug: nextSlug,
+      });
+      setIsModalOpen(true);
+
+      // Refresh submissions history
+      fetchSubmissions();
+    } catch (err: any) {
+      console.error("Submission failed:", err);
+      const sanitized = sanitizeStackTrace(err?.message || String(err), 1);
+      setModalData({
+        status: "RUNTIME_ERROR",
+        runtimeMs: 0,
+        passedTestCases: 0,
+        totalTestCases: problem.publicTestCases.length,
+        testResultsDetail: [
+          {
+            testCaseId: "err",
+            passed: false,
+            logs: [],
+            executionTimeMs: 0,
+            error: {
+              message: sanitized.message,
+              line: sanitized.line,
+              column: sanitized.column,
+              sanitizedStack: sanitized.cleanStack,
+            },
+          },
+        ],
+      });
+      setIsModalOpen(true);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -105,6 +268,46 @@ export const ProblemWorkspace: React.FC<ProblemWorkspaceProps> = ({
         return "bg-rose-500/10 text-rose-400 border-rose-500/30";
       default:
         return "bg-slate-800 text-slate-400 border-slate-700";
+    }
+  };
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case "ACCEPTED":
+        return (
+          <span className="inline-flex items-center gap-1 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 text-xs font-semibold">
+            <CheckCircle2 className="h-3 w-3" />
+            <span>Accepted</span>
+          </span>
+        );
+      case "WRONG_ANSWER":
+        return (
+          <span className="inline-flex items-center gap-1 rounded bg-rose-500/10 text-rose-400 border border-rose-500/30 px-2 py-0.5 text-xs font-semibold">
+            <XCircle className="h-3 w-3" />
+            <span>Wrong Answer</span>
+          </span>
+        );
+      case "TIME_LIMIT_EXCEEDED":
+        return (
+          <span className="inline-flex items-center gap-1 rounded bg-amber-500/10 text-amber-400 border border-amber-500/30 px-2 py-0.5 text-xs font-semibold">
+            <Clock className="h-3 w-3" />
+            <span>Time Limit Exceeded</span>
+          </span>
+        );
+      case "SYNTAX_ERROR":
+        return (
+          <span className="inline-flex items-center gap-1 rounded bg-rose-500/10 text-rose-400 border border-rose-500/30 px-2 py-0.5 text-xs font-semibold">
+            <AlertOctagon className="h-3 w-3" />
+            <span>Syntax Error</span>
+          </span>
+        );
+      default:
+        return (
+          <span className="inline-flex items-center gap-1 rounded bg-rose-500/10 text-rose-400 border border-rose-500/30 px-2 py-0.5 text-xs font-semibold">
+            <AlertTriangle className="h-3 w-3" />
+            <span>Runtime Error</span>
+          </span>
+        );
     }
   };
 
@@ -136,7 +339,7 @@ export const ProblemWorkspace: React.FC<ProblemWorkspaceProps> = ({
 
       {/* Main Split Body: Left Description / Right Monaco & Output */}
       <div className="flex flex-1 flex-col lg:flex-row overflow-hidden">
-        {/* Left Column: Problem Details & Hints */}
+        {/* Left Column: Problem Details, Hints, & Submissions */}
         <div className="flex flex-col w-full lg:w-[45%] h-1/2 lg:h-full border-r border-slate-800 bg-[#0a0f1a] overflow-hidden">
           {/* Left Column Tabs */}
           <div className="flex items-center gap-2 px-4 border-b border-slate-800 bg-[#0c121e] h-10">
@@ -167,11 +370,27 @@ export const ProblemWorkspace: React.FC<ProblemWorkspaceProps> = ({
                 <span>Hints ({problem.hints.length})</span>
               </button>
             )}
+
+            <button
+              type="button"
+              onClick={() => {
+                setActiveTab("submissions");
+                fetchSubmissions();
+              }}
+              className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-t border-b-2 transition-all ${
+                activeTab === "submissions"
+                  ? "border-blue-500 text-blue-400 bg-slate-800/40"
+                  : "border-transparent text-slate-400 hover:text-slate-200"
+              }`}
+            >
+              <History className="h-3.5 w-3.5 text-blue-400" />
+              <span>Submissions</span>
+            </button>
           </div>
 
           {/* Left Column Scrollable Content */}
           <div className="flex-1 overflow-y-auto p-5 text-sm text-slate-300 space-y-5">
-            {activeTab === "description" ? (
+            {activeTab === "description" && (
               <>
                 {/* Topic Tags */}
                 <div className="flex flex-wrap items-center gap-1.5">
@@ -191,11 +410,13 @@ export const ProblemWorkspace: React.FC<ProblemWorkspaceProps> = ({
                   {problem.description}
                 </div>
               </>
-            ) : (
-              /* Hints Tab */
+            )}
+
+            {activeTab === "hints" && (
               <div className="space-y-3">
                 <p className="text-xs text-slate-400 mb-2">
-                  Need a nudge? Expand hints one by one to avoid spoiling the complete solution.
+                  Need a nudge? Expand hints one by one to avoid spoiling the
+                  complete solution.
                 </p>
                 {problem.hints.map((hint, idx) => (
                   <div
@@ -223,6 +444,107 @@ export const ProblemWorkspace: React.FC<ProblemWorkspaceProps> = ({
                 ))}
               </div>
             )}
+
+            {activeTab === "submissions" && (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                    Submission History
+                  </h3>
+                  <button
+                    type="button"
+                    onClick={fetchSubmissions}
+                    className="text-xs text-blue-400 hover:text-blue-300 transition-colors"
+                  >
+                    Refresh
+                  </button>
+                </div>
+
+                {isLoadingSubmissions ? (
+                  <div className="flex items-center justify-center py-12 text-slate-500 gap-2">
+                    <Loader2 className="h-4 w-4 animate-spin text-blue-400" />
+                    <span className="text-xs">Loading past submissions...</span>
+                  </div>
+                ) : submissionsHistory.length === 0 ? (
+                  <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-6 text-center text-slate-400">
+                    <History className="h-8 w-8 text-slate-600 mx-auto mb-2" />
+                    <p className="text-xs font-medium text-slate-300">
+                      No submissions recorded yet
+                    </p>
+                    <p className="text-[11px] text-slate-500 mt-1">
+                      Write your solution and click &quot;Submit&quot; to test against
+                      all test cases.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-2.5">
+                    {submissionsHistory.map((sub) => {
+                      const isExpanded = expandedSubmissionId === sub.id;
+                      return (
+                        <div
+                          key={sub.id}
+                          className="rounded-lg border border-slate-800 bg-slate-900/60 overflow-hidden hover:border-slate-700 transition-colors"
+                        >
+                          <div
+                            onClick={() =>
+                              setExpandedSubmissionId(isExpanded ? null : sub.id)
+                            }
+                            className="flex items-center justify-between p-3 cursor-pointer select-none"
+                          >
+                            <div className="flex items-center gap-2.5">
+                              {getStatusBadge(sub.status)}
+                              <span className="text-xs font-mono text-slate-400">
+                                {sub.passedTestCases} / {sub.totalTestCases}
+                              </span>
+                            </div>
+
+                            <div className="flex items-center gap-3 text-xs text-slate-400">
+                              {sub.runtimeMs !== undefined && (
+                                <span className="font-mono text-slate-300">
+                                  {sub.runtimeMs}ms
+                                </span>
+                              )}
+                              <span className="text-[11px] text-slate-500">
+                                {new Date(sub.submittedAt).toLocaleTimeString([], {
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                })}
+                              </span>
+                              {isExpanded ? (
+                                <ChevronUp className="h-3.5 w-3.5 text-slate-400" />
+                              ) : (
+                                <ChevronDown className="h-3.5 w-3.5 text-slate-400" />
+                              )}
+                            </div>
+                          </div>
+
+                          {isExpanded && sub.code && (
+                            <div className="p-3 pt-0 border-t border-slate-800/80 bg-slate-950/50">
+                              <div className="flex items-center justify-between text-[11px] text-slate-400 py-1 mb-1">
+                                <span className="flex items-center gap-1 font-medium">
+                                  <Code2 className="h-3 w-3 text-blue-400" />
+                                  Submitted Code
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => setCode(sub.code)}
+                                  className="text-[10px] text-blue-400 hover:text-blue-300 underline"
+                                >
+                                  Load into editor
+                                </button>
+                              </div>
+                              <pre className="p-2.5 rounded bg-slate-950 font-mono text-[11px] text-slate-300 overflow-x-auto border border-slate-800 max-h-40">
+                                {sub.code}
+                              </pre>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
@@ -234,7 +556,9 @@ export const ProblemWorkspace: React.FC<ProblemWorkspaceProps> = ({
               problemTitle={problem.title}
               difficulty={problem.difficulty}
               isRunning={isRunning}
+              isSubmitting={isSubmitting}
               onRun={handleRun}
+              onSubmit={handleSubmit}
               onReset={handleReset}
               executionTimeMs={runResponse?.totalDurationMs}
             />
@@ -257,6 +581,13 @@ export const ProblemWorkspace: React.FC<ProblemWorkspaceProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Submission Verdict Modal */}
+      <SubmissionModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        submission={modalData}
+      />
     </div>
   );
 };

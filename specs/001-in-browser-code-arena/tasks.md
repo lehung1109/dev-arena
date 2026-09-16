@@ -153,18 +153,18 @@ Every phase in this document strictly adheres to the **Dev Arena Constitution (v
 
 ### Phase 4 Workflow & Checklist
 
-- [ ] T037 Launch dedicated Phase 4 subagent for User Story 2
-- [ ] T038 [P] [US2] Author unit tests for error stack trace sanitizer in tests/unit/error-sanitizer.test.ts (TDD Red: strips internal worker wrappers and maps to user code line/column)
-- [ ] T039 [P] [US2] Author contract tests for POST /api/submissions and GET /api/submissions in tests/contract/submissions-api.test.ts (TDD Red)
-- [ ] T040 [US2] Implement stack trace sanitizer in src/lib/runner/error-sanitizer.ts
-- [ ] T041 [US2] Implement test case loader endpoint in src/app/api/problems/[slug]/test-cases/route.ts supporting public and hidden evaluation scopes
-- [ ] T042 [US2] Implement submission creation and history endpoint in src/app/api/submissions/route.ts with Drizzle insert and status calculation
-- [ ] T043 [US2] Implement submission detail query in src/app/api/submissions/[id]/route.ts
-- [ ] T044 [P] [US2] Implement SubmissionModal component in src/components/editor/SubmissionModal.tsx rendering Accepted badges, runtime percentiles, and test breakdown
-- [ ] T045 [US2] Integrate Submit workflow in src/app/problems/[slug]/page.tsx triggering test-suite evaluation and submission persistence
-- [ ] T046 Verify all tests pass (`bun test tests/unit/error-sanitizer.test.ts tests/contract/submissions-api.test.ts`)
-- [ ] T047 Spawn review subagent to audit submission security, hidden test case confidentiality, and error sanitization
-- [ ] T048 Execute Phase 4 conventional commit: `feat(submission): implement comprehensive test evaluation and submission persistence`
+- [X] T037 Launch dedicated Phase 4 subagent for User Story 2
+- [X] T038 [P] [US2] Author unit tests for error stack trace sanitizer in tests/unit/error-sanitizer.test.ts (TDD Red: strips internal worker wrappers and maps to user code line/column)
+- [X] T039 [P] [US2] Author contract tests for POST /api/submissions and GET /api/submissions in tests/contract/submissions-api.test.ts (TDD Red)
+- [X] T040 [US2] Implement stack trace sanitizer in src/lib/runner/error-sanitizer.ts
+- [X] T041 [US2] Implement test case loader endpoint in src/app/api/problems/[slug]/test-cases/route.ts supporting public and hidden evaluation scopes
+- [X] T042 [US2] Implement submission creation and history endpoint in src/app/api/submissions/route.ts with Drizzle insert and status calculation
+- [X] T043 [US2] Implement submission detail query in src/app/api/submissions/[id]/route.ts
+- [X] T044 [P] [US2] Implement SubmissionModal component in src/components/editor/SubmissionModal.tsx rendering Accepted badges, runtime percentiles, and test breakdown
+- [X] T045 [US2] Integrate Submit workflow in src/app/problems/[slug]/page.tsx triggering test-suite evaluation and submission persistence
+- [X] T046 Verify all tests pass (`bun test tests/unit/error-sanitizer.test.ts tests/contract/submissions-api.test.ts`)
+- [X] T047 Spawn review subagent to audit submission security, hidden test case confidentiality, and error sanitization
+- [X] T048 Execute Phase 4 conventional commit: `feat(submission): implement comprehensive test evaluation and submission persistence`
 
 ---
 
