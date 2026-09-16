@@ -331,15 +331,15 @@ Every phase in this document strictly adheres to the **Dev Arena Constitution (v
 
 ### Phase 9 Workflow & Checklist
 
-- [ ] T096 Launch dedicated Phase 9 subagent for User Story 7
-- [ ] T097 [P] [US7] Author contract tests for discussions endpoints in tests/contract/discussions-api.test.ts (TDD Red)
-- [ ] T098 [US7] Implement discussions API route in src/app/api/problems/[slug]/discussions/route.ts
-- [ ] T099 [P] [US7] Implement ProblemDiscussions component in src/components/discussions/ProblemDiscussions.tsx with Markdown rendering and approach tags
-- [ ] T100 [US7] Implement Mock Interview lobby in src/app/interview/page.tsx
-- [ ] T101 [US7] Implement collaborative Mock Interview room in src/app/interview/[roomId]/page.tsx with shared problem description and timer
-- [ ] T102 Verify all tests pass (`bun test tests/contract/discussions-api.test.ts`)
-- [ ] T103 Spawn review subagent to audit discussion content sanitization (XSS prevention) and room lifecycle
-- [ ] T104 Execute Phase 9 conventional commit: `feat(community): implement solution discussions and mock interview room`
+- [X] T096 Launch dedicated Phase 9 subagent for User Story 7
+- [X] T097 [P] [US7] Author contract tests for discussions endpoints in tests/contract/discussions-api.test.ts (TDD Red)
+- [X] T098 [US7] Implement discussions API route in src/app/api/problems/[slug]/discussions/route.ts
+- [X] T099 [P] [US7] Implement ProblemDiscussions component in src/components/discussions/ProblemDiscussions.tsx with Markdown rendering and approach tags
+- [X] T100 [US7] Implement Mock Interview lobby in src/app/interview/page.tsx
+- [X] T101 [US7] Implement collaborative Mock Interview room in src/app/interview/[roomId]/page.tsx with shared problem description and timer
+- [X] T102 Verify all tests pass (`bun test tests/contract/discussions-api.test.ts`)
+- [X] T103 Spawn review subagent to audit discussion content sanitization (XSS prevention) and room lifecycle
+- [X] T104 Execute Phase 9 conventional commit: `feat(community): implement solution discussions and mock interview room`
 
 ---
 

@@ -18,6 +18,7 @@ import {
   Loader2,
   Code2,
   Sparkles,
+  MessageSquare,
 } from "lucide-react";
 import { MonacoCodeEditor } from "@/components/editor/MonacoCodeEditor";
 import { EditorHeader } from "@/components/editor/EditorHeader";
@@ -27,6 +28,7 @@ import {
   type SubmissionModalData,
 } from "@/components/editor/SubmissionModal";
 import { AITutorPanel } from "@/components/ai/AITutorPanel";
+import { ProblemDiscussions } from "@/components/discussions/ProblemDiscussions";
 import { WorkerRunnerManager } from "@/lib/runner/WorkerRunnerManager";
 import { sanitizeStackTrace } from "@/lib/runner/error-sanitizer";
 import { analyzeAST, type ExtendedASTAnalysisMetrics } from "@/lib/analysis/ast-analyzer";
@@ -68,7 +70,7 @@ export const ProblemWorkspace: React.FC<ProblemWorkspaceProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [runResponse, setRunResponse] = useState<RunCodeResponse | null>(null);
   const [activeTab, setActiveTab] = useState<
-    "description" | "hints" | "submissions"
+    "description" | "hints" | "submissions" | "discussions"
   >("description");
   const [openHints, setOpenHints] = useState<Record<number, boolean>>({});
 
@@ -508,6 +510,19 @@ export const ProblemWorkspace: React.FC<ProblemWorkspaceProps> = ({
               <History className="h-3.5 w-3.5 text-blue-400" />
               <span>Submissions</span>
             </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveTab("discussions")}
+              className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-t border-b-2 transition-all ${
+                activeTab === "discussions"
+                  ? "border-blue-500 text-blue-400 bg-slate-800/40"
+                  : "border-transparent text-slate-400 hover:text-slate-200"
+              }`}
+            >
+              <MessageSquare className="h-3.5 w-3.5 text-purple-400" />
+              <span>Discussions</span>
+            </button>
           </div>
 
           {/* Left Column Scrollable Content */}
@@ -687,6 +702,13 @@ export const ProblemWorkspace: React.FC<ProblemWorkspaceProps> = ({
                   </div>
                 )}
               </div>
+            )}
+
+            {activeTab === "discussions" && (
+              <ProblemDiscussions
+                problemSlug={problem.slug}
+                problemId={problem.id}
+              />
             )}
           </div>
         </div>
