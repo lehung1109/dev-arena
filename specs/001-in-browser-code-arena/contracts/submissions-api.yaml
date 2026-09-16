@@ -1,0 +1,141 @@
+openapi: 3.0.3
+info:
+  title: Dev Arena Submissions API
+  version: 1.0.0
+  description: API endpoints for persisting and querying code submissions.
+
+paths:
+  /api/submissions:
+    post:
+      summary: Save a verified code submission record
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSubmissionRequest'
+      responses:
+        '201':
+          description: Submission recorded successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubmissionResponse'
+        '400':
+          description: Invalid submission data
+
+    get:
+      summary: List user submission history
+      parameters:
+        - name: problemId
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+      responses:
+        '200':
+          description: Submission history
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SubmissionResponse'
+                  total:
+                    type: integer
+
+  /api/submissions/{id}:
+    get:
+      summary: Get details of a single submission
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Detailed submission with code and test verdicts
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubmissionDetail'
+        '404':
+          description: Submission not found
+
+components:
+  schemas:
+    CreateSubmissionRequest:
+      type: object
+      required:
+        - problemId
+        - code
+        - status
+        - passedTestCases
+        - totalTestCases
+      properties:
+        problemId:
+          type: string
+        code:
+          type: string
+        status:
+          type: string
+          enum: [ACCEPTED, WRONG_ANSWER, TIME_LIMIT_EXCEEDED, RUNTIME_ERROR, SYNTAX_ERROR]
+        runtimeMs:
+          type: number
+        memoryBytes:
+          type: number
+        passedTestCases:
+          type: integer
+        totalTestCases:
+          type: integer
+        testResultsDetail:
+          type: array
+          items: {}
+        astMetrics:
+          type: object
+
+    SubmissionResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        problemId:
+          type: string
+        problemTitle:
+          type: string
+        status:
+          type: string
+        runtimeMs:
+          type: number
+        passedTestCases:
+          type: integer
+        totalTestCases:
+          type: integer
+        submittedAt:
+          type: string
+          format: date-time
+
+    SubmissionDetail:
+      allOf:
+        - $ref: '#/components/schemas/SubmissionResponse'
+        - type: object
+          properties:
+            code:
+              type: string
+            testResultsDetail:
+              type: array
+              items: {}
+            astMetrics:
+              type: object

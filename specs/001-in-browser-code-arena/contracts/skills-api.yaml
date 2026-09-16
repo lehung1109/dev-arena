@@ -1,0 +1,76 @@
+openapi: 3.0.3
+info:
+  title: Dev Arena Skill Tree & Curriculum API
+  version: 1.0.0
+  description: API endpoints for curriculum DAG, prerequisite unlocks, and learner mastery radar data.
+
+paths:
+  /api/skills/tree:
+    get:
+      summary: Get the complete DSA Skill Tree DAG with unlock status for the current user
+      responses:
+        '200':
+          description: Skill Tree DAG nodes
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  nodes:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SkillTreeNode'
+
+  /api/skills/radar:
+    get:
+      summary: Get aggregated mastery scores across algorithm categories for the radar chart
+      responses:
+        '200':
+          description: User mastery radar data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  categories:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SkillCategoryMastery'
+
+components:
+  schemas:
+    SkillTreeNode:
+      type: object
+      properties:
+        id:
+          type: string
+        topicName:
+          type: string
+        description:
+          type: string
+        icon:
+          type: string
+        prerequisites:
+          type: array
+          items:
+            type: string
+        requiredSolves:
+          type: integer
+        solvedCount:
+          type: integer
+        isUnlocked:
+          type: boolean
+        masteryScore:
+          type: number
+
+    SkillCategoryMastery:
+      type: object
+      properties:
+        category:
+          type: string
+        score:
+          type: number
+        solvedCount:
+          type: integer
+        totalCount:
+          type: integer

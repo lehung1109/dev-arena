@@ -1,0 +1,182 @@
+openapi: 3.0.3
+info:
+  title: Dev Arena Problems API
+  version: 1.0.0
+  description: API endpoints for retrieving algorithm problems and public/hidden test suites.
+
+paths:
+  /api/problems:
+    get:
+      summary: List problems with filtering and pagination
+      parameters:
+        - name: difficulty
+          in: query
+          schema:
+            type: string
+            enum: [EASY, MEDIUM, HARD]
+        - name: topic
+          in: query
+          schema:
+            type: string
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Paginated problem list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ProblemListItem'
+                  total:
+                    type: integer
+                  page:
+                    type: integer
+                  totalPages:
+                    type: integer
+
+  /api/problems/{slug}:
+    get:
+      summary: Get problem detail including starter code and public test cases
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Problem details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '404':
+          description: Problem not found
+
+  /api/problems/{slug}/test-cases:
+    get:
+      summary: Fetch test cases for execution (public only for unauthenticated, all for runner verification)
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: scope
+          in: query
+          schema:
+            type: string
+            enum: [public, all]
+            default: public
+      responses:
+        '200':
+          description: Test case list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  testCases:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TestCase'
+                  benchmarkCases:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/BenchmarkCase'
+
+components:
+  schemas:
+    ProblemListItem:
+      type: object
+      properties:
+        id:
+          type: string
+        slug:
+          type: string
+        title:
+          type: string
+        difficulty:
+          type: string
+          enum: [EASY, MEDIUM, HARD]
+        topicTags:
+          type: array
+          items:
+            type: string
+        acceptanceRate:
+          type: number
+
+    ProblemDetail:
+      type: object
+      properties:
+        id:
+          type: string
+        slug:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        difficulty:
+          type: string
+          enum: [EASY, MEDIUM, HARD]
+        topicTags:
+          type: array
+          items:
+            type: string
+        starterCode:
+          type: string
+        functionName:
+          type: string
+        hints:
+          type: array
+          items:
+            type: string
+        publicTestCases:
+          type: array
+          items:
+            $ref: '#/components/schemas/TestCase'
+
+    TestCase:
+      type: object
+      properties:
+        id:
+          type: string
+        input:
+          type: array
+          items: {}
+        expectedOutput: {}
+        isPublic:
+          type: boolean
+        orderIndex:
+          type: integer
+        explanation:
+          type: string
+
+    BenchmarkCase:
+      type: object
+      properties:
+        id:
+          type: string
+        inputSize:
+          type: integer
+        inputPayload:
+          type: array
+          items: {}
