@@ -17,6 +17,7 @@ import {
   AlertOctagon,
   Loader2,
   Code2,
+  Sparkles,
 } from "lucide-react";
 import { MonacoCodeEditor } from "@/components/editor/MonacoCodeEditor";
 import { EditorHeader } from "@/components/editor/EditorHeader";
@@ -25,6 +26,7 @@ import {
   SubmissionModal,
   type SubmissionModalData,
 } from "@/components/editor/SubmissionModal";
+import { AITutorPanel } from "@/components/ai/AITutorPanel";
 import { WorkerRunnerManager } from "@/lib/runner/WorkerRunnerManager";
 import { sanitizeStackTrace } from "@/lib/runner/error-sanitizer";
 import { analyzeAST, type ExtendedASTAnalysisMetrics } from "@/lib/analysis/ast-analyzer";
@@ -87,6 +89,9 @@ export const ProblemWorkspace: React.FC<ProblemWorkspaceProps> = ({
   const [expandedSubmissionId, setExpandedSubmissionId] = useState<string | null>(
     null
   );
+
+  // Socratic AI Tutor drawer state
+  const [isAITutorOpen, setIsAITutorOpen] = useState(false);
 
   const runnerRef = useRef<WorkerRunnerManager | null>(null);
 
@@ -559,6 +564,27 @@ export const ProblemWorkspace: React.FC<ProblemWorkspaceProps> = ({
                     )}
                   </div>
                 ))}
+
+                {/* Socratic AI Tutor Interactive Guidance Card */}
+                <div className="rounded-xl border border-blue-500/30 bg-blue-500/5 p-4 mt-4">
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <Sparkles className="h-4 w-4 text-blue-400" />
+                    <span className="text-xs font-semibold text-blue-300">
+                      Want interactive Socratic guidance?
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-400 mb-3 leading-relaxed">
+                    Our AI Tutor provides 3 levels of progressive hints, error diagnosis, and pattern recommendations without spoiling code.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setIsAITutorOpen(true)}
+                    className="flex items-center gap-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 text-xs font-semibold shadow-md shadow-blue-600/20 transition-all active:scale-95"
+                  >
+                    <Sparkles className="h-3.5 w-3.5" />
+                    <span>Open Socratic AI Tutor</span>
+                  </button>
+                </div>
               </div>
             )}
 
@@ -678,6 +704,8 @@ export const ProblemWorkspace: React.FC<ProblemWorkspaceProps> = ({
               onSubmit={handleSubmit}
               onReset={handleReset}
               executionTimeMs={runResponse?.totalDurationMs}
+              onToggleAITutor={() => setIsAITutorOpen((prev) => !prev)}
+              isAITutorOpen={isAITutorOpen}
             />
             <div className="flex-1 w-full overflow-hidden">
               <MonacoCodeEditor
@@ -715,6 +743,21 @@ export const ProblemWorkspace: React.FC<ProblemWorkspaceProps> = ({
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         submission={modalData}
+      />
+
+      {/* Socratic AI Tutor Slide-over Drawer */}
+      <AITutorPanel
+        isOpen={isAITutorOpen}
+        onClose={() => setIsAITutorOpen(false)}
+        problemSlug={problem.slug}
+        problemTitle={problem.title}
+        userCode={code}
+        errorContext={
+          runResponse?.results?.find((r) => !r.passed)?.error?.message ||
+          (runResponse?.verdict && runResponse.verdict !== "ACCEPTED"
+            ? `Verdict: ${runResponse.verdict}`
+            : undefined)
+        }
       />
     </div>
   );

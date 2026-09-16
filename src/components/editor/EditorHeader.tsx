@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Play, RotateCcw, Send, Loader2, Code2, Zap } from "lucide-react";
+import { Play, RotateCcw, Send, Loader2, Code2, Zap, Sparkles } from "lucide-react";
 
 interface EditorHeaderProps {
   problemTitle?: string;
@@ -12,6 +12,8 @@ interface EditorHeaderProps {
   onSubmit?: () => void;
   onReset: () => void;
   executionTimeMs?: number;
+  onToggleAITutor?: () => void;
+  isAITutorOpen?: boolean;
 }
 
 export const EditorHeader: React.FC<EditorHeaderProps> = ({
@@ -23,6 +25,8 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
   onSubmit,
   onReset,
   executionTimeMs,
+  onToggleAITutor,
+  isAITutorOpen = false,
 }) => {
   const getDifficultyBadge = () => {
     switch (difficulty) {
@@ -68,6 +72,25 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
             <Zap className="h-3.5 w-3.5" />
             <span className="font-mono">{executionTimeMs}ms</span>
           </div>
+        )}
+
+        {onToggleAITutor && (
+          <button
+            type="button"
+            onClick={onToggleAITutor}
+            title="Open Socratic AI Tutor"
+            className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium border transition-all ${
+              isAITutorOpen
+                ? "bg-blue-600/20 text-blue-300 border-blue-500/50 shadow-sm"
+                : "bg-slate-800/80 hover:bg-slate-700 text-slate-300 border-slate-700 hover:border-slate-600"
+            }`}
+          >
+            <Sparkles className="h-3.5 w-3.5 text-blue-400" />
+            <span>AI Hint</span>
+            <span className="hidden sm:inline-block rounded bg-blue-500/20 border border-blue-500/30 px-1 py-0.2 text-[9px] font-bold text-blue-300">
+              3 Tiers
+            </span>
+          </button>
         )}
 
         <button

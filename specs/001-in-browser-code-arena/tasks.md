@@ -262,16 +262,16 @@ Every phase in this document strictly adheres to the **Dev Arena Constitution (v
 
 ### Phase 7 Workflow & Checklist
 
-- [ ] T074 Launch dedicated Phase 7 subagent for User Story 5
-- [ ] T075 [P] [US5] Author unit tests for Socratic prompt builder and anti-spoiler regex guardrails in tests/unit/socratic-tutor.test.ts (TDD Red: rejects code blocks or solution reveals)
-- [ ] T076 [P] [US5] Author contract test for POST /api/ai/hint in tests/contract/ai-hint-api.test.ts (TDD Red)
-- [ ] T077 [US5] Implement Socratic hint prompt engineering and anti-solution output filter in src/lib/ai/socratic-tutor.ts
-- [ ] T078 [US5] Implement AI hint API route in src/app/api/ai/hint/route.ts with rate-limiting and tier validation
-- [ ] T079 [P] [US5] Implement AITutorPanel drawer component in src/components/ai/AITutorPanel.tsx inside the problem workspace
-- [ ] T080 [US5] Integrate AI Tutor drawer into problem page in src/app/problems/[slug]/page.tsx
-- [ ] T081 Verify all tests pass (`bun test tests/unit/socratic-tutor.test.ts tests/contract/ai-hint-api.test.ts`)
-- [ ] T082 Spawn review subagent to audit prompt injection resistance, anti-spoiler regex robustness, and API latency
-- [ ] T083 Execute Phase 7 conventional commit: `feat(ai): implement tiered Socratic AI tutor with anti-spoiler guardrails`
+- [X] T074 Launch dedicated Phase 7 subagent for User Story 5
+- [X] T075 [P] [US5] Author unit tests for Socratic prompt builder and anti-spoiler regex guardrails in tests/unit/socratic-tutor.test.ts (TDD Red: rejects code blocks or solution reveals)
+- [X] T076 [P] [US5] Author contract test for POST /api/ai/hint in tests/contract/ai-hint-api.test.ts (TDD Red)
+- [X] T077 [US5] Implement Socratic hint prompt engineering and anti-solution output filter in src/lib/ai/socratic-tutor.ts
+- [X] T078 [US5] Implement AI hint API route in src/app/api/ai/hint/route.ts with rate-limiting and tier validation
+- [X] T079 [P] [US5] Implement AITutorPanel drawer component in src/components/ai/AITutorPanel.tsx inside the problem workspace
+- [X] T080 [US5] Integrate AI Tutor drawer into problem page in src/app/problems/[slug]/page.tsx
+- [X] T081 Verify all tests pass (`bun test tests/unit/socratic-tutor.test.ts tests/contract/ai-hint-api.test.ts`)
+- [X] T082 Spawn review subagent to audit prompt injection resistance, anti-spoiler regex robustness, and API latency
+- [X] T083 Execute Phase 7 conventional commit: `feat(ai): implement tiered Socratic AI tutor with anti-spoiler guardrails`
 
 ---
 
