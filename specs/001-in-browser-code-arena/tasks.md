@@ -41,16 +41,16 @@ Every phase in this document strictly adheres to the **Dev Arena Constitution (v
 
 ### Phase 1 Workflow & Checklist
 
-- [ ] T001 Prompt user to confirm creation of isolated git worktree `dev-arena-001-sandbox` and switch workspace to it
-- [ ] T002 Launch dedicated Phase 1 subagent for project scaffolding
-- [ ] T003 Initialize Next.js 16 App Router project with Bun in package.json using exact verified latest packages (`next@^16.3.5`, `react@^19.3.0`, `react-dom@^19.3.0`, `typescript@^7.0.2`, `tailwindcss@^4.3.3`, `bun@^1.4.2`)
-- [ ] T004 [P] Configure TypeScript 7 compiler options in tsconfig.json with strict type checking, path aliases (`@/*` -> `./src/*`), and DOM/WebWorker lib types
-- [ ] T005 [P] Configure Drizzle ORM and Neon connection settings in drizzle.config.ts
-- [ ] T006 [P] Configure Vitest unit test runner in vitest.config.ts and Playwright in playwright.config.ts
-- [ ] T007 [P] Create .env.example with `DATABASE_URL` placeholder for Neon Serverless PostgreSQL
-- [ ] T008 Run validation commands (`bun install`, `bun test`, `bun run typecheck`) and verify zero errors
-- [ ] T009 Spawn review subagent to audit Phase 1 scaffolding, hunt for configuration bugs, and verify compliance with constitution
-- [ ] T010 Execute Phase 1 conventional commit: `chore(setup): scaffold Next.js 16, Bun, Drizzle, and test tooling`
+- [X] T001 Prompt user to confirm creation of isolated git worktree `dev-arena-001-sandbox` and switch workspace to it
+- [X] T002 Launch dedicated Phase 1 subagent for project scaffolding
+- [X] T003 Initialize Next.js 16 App Router project with Bun in package.json using exact verified latest packages (`next@^16.3.5`, `react@^19.3.0`, `react-dom@^19.3.0`, `typescript@^7.0.2`, `tailwindcss@^4.3.3`, `bun@^1.4.2`)
+- [X] T004 [P] Configure TypeScript 7 compiler options in tsconfig.json with strict type checking, path aliases (`@/*` -> `./src/*`), and DOM/WebWorker lib types
+- [X] T005 [P] Configure Drizzle ORM and Neon connection settings in drizzle.config.ts
+- [X] T006 [P] Configure Vitest unit test runner in vitest.config.ts and Playwright in playwright.config.ts
+- [X] T007 [P] Create .env.example with `DATABASE_URL` placeholder for Neon Serverless PostgreSQL
+- [X] T008 Run validation commands (`bun install`, `bun test`, `bun run typecheck`) and verify zero errors
+- [X] T009 Spawn review subagent to audit Phase 1 scaffolding, hunt for configuration bugs, and verify compliance with constitution
+- [X] T010 Execute Phase 1 conventional commit: `chore(setup): scaffold Next.js 16, Bun, Drizzle, and test tooling`
 
 ---
 
