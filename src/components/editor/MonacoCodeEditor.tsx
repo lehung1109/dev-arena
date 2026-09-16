@@ -48,6 +48,11 @@ export const MonacoCodeEditor: React.FC<MonacoCodeEditorProps> = ({
     editorRef.current = editor;
     monacoRef.current = monaco;
 
+    if (typeof window !== "undefined") {
+      (window as any).__monacoEditor = editor;
+      (window as any).monaco = monaco;
+    }
+
     if (onMount) {
       onMount(editor, monaco);
     }

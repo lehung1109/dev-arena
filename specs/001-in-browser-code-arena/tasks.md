@@ -360,13 +360,13 @@ Every phase in this document strictly adheres to the **Dev Arena Constitution (v
 
 ### Phase 10 Workflow & Checklist
 
-- [ ] T105 Launch dedicated Phase 10 subagent for holistic feature review
-- [ ] T106 Implement Playwright E2E test verifying complete problem solving journey in tests/e2e/solve-problem.spec.ts (navigate -> solve Two Sum -> Run Code -> Submit -> check solved badge)
-- [ ] T107 [P] Implement Playwright E2E test for contest navigation and leaderboards in tests/e2e/contests.spec.ts
-- [ ] T108 Execute full validation suite (`bun run typecheck`, `bun run lint`, `bun test`, `bun run test:e2e`)
-- [ ] T109 Spawn final review subagent to perform aggressive bug hunting, audit edge cases, and ensure strict compliance with constitution
-- [ ] T110 Update project README.md with architecture overview, local development guide with Bun, and screenshots/GIFs
-- [ ] T111 Execute final comprehensive conventional commit: `chore(release): finalize Dev Arena in-browser code arena v1.0.0`
+- [X] T105 Launch dedicated Phase 10 subagent for holistic feature review
+- [X] T106 Implement Playwright E2E test verifying complete problem solving journey in tests/e2e/solve-problem.spec.ts (navigate -> solve Two Sum -> Run Code -> Submit -> check solved badge)
+- [X] T107 [P] Implement Playwright E2E test for contest navigation and leaderboards in tests/e2e/contests.spec.ts
+- [X] T108 Execute full validation suite (`bun run typecheck`, `bun run lint`, `bun test`, `bun run test:e2e`)
+- [X] T109 Spawn final review subagent to perform aggressive bug hunting, audit edge cases, and ensure strict compliance with constitution
+- [X] T110 Update project README.md with architecture overview, local development guide with Bun, and screenshots/GIFs
+- [X] T111 Execute final comprehensive conventional commit: `chore(release): finalize Dev Arena in-browser code arena v1.0.0`
 
 ---
 
