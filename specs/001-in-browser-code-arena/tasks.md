@@ -114,21 +114,21 @@ Every phase in this document strictly adheres to the **Dev Arena Constitution (v
 
 ### Phase 3 Workflow & Checklist
 
-- [ ] T022 Launch dedicated Phase 3 subagent for User Story 1
-- [ ] T023 [P] [US1] Author unit test for deep equality comparison in tests/unit/deep-equal.test.ts (TDD Red: handles primitives, nested objects, arrays, null/undefined, and cyclic references)
-- [ ] T024 [P] [US1] Author unit test for WorkerRunnerManager in tests/unit/runner-manager.test.ts (TDD Red: test execution success, output capture, and 2000ms TLE abort)
-- [ ] T025 [P] [US1] Author contract test for GET /api/problems/[slug] in tests/contract/problems-api.test.ts (TDD Red)
-- [ ] T026 [P] [US1] Implement robust structural deep-equal comparator in src/lib/runner/deep-equal.ts
-- [ ] T027 [US1] Implement isolated sandboxed Web Worker in src/lib/runner/runner.worker.ts with proxy console logging and exception boundary
-- [ ] T028 [US1] Implement WorkerRunnerManager in src/lib/runner/WorkerRunnerManager.ts managing worker lifecycle, timeout timers (2000ms), and worker.terminate() safety cutoff
-- [ ] T029 [US1] Implement route handler for problem detail in src/app/api/problems/[slug]/route.ts
-- [ ] T030 [P] [US1] Implement Monaco Code Editor component in src/components/editor/MonacoCodeEditor.tsx with JavaScript language mode, dark theme, and code folding
-- [ ] T031 [P] [US1] Implement EditorHeader component in src/components/editor/EditorHeader.tsx with Run / Submit triggers and reset button
-- [ ] T032 [P] [US1] Implement OutputPanel component in src/components/editor/OutputPanel.tsx rendering tabs for test cases, console output logs, and execution duration
-- [ ] T033 [US1] Assemble complete problem workspace in src/app/problems/[slug]/page.tsx connecting editor, worker runner, and output panel
-- [ ] T034 Verify all tests pass (`bun test tests/unit/deep-equal.test.ts tests/unit/runner-manager.test.ts tests/contract/problems-api.test.ts`)
-- [ ] T035 Spawn review subagent to audit in-browser execution safety, memory leaks in worker lifecycle, and UI responsiveness
-- [ ] T036 Execute Phase 3 conventional commit: `feat(runner): implement in-browser Web Worker execution engine and Monaco workspace`
+- [X] T022 Launch dedicated Phase 3 subagent for User Story 1
+- [X] T023 [P] [US1] Author unit test for deep equality comparison in tests/unit/deep-equal.test.ts (TDD Red: handles primitives, nested objects, arrays, null/undefined, and cyclic references)
+- [X] T024 [P] [US1] Author unit test for WorkerRunnerManager in tests/unit/runner-manager.test.ts (TDD Red: test execution success, output capture, and 2000ms TLE abort)
+- [X] T025 [P] [US1] Author contract test for GET /api/problems/[slug] in tests/contract/problems-api.test.ts (TDD Red)
+- [X] T026 [P] [US1] Implement robust structural deep-equal comparator in src/lib/runner/deep-equal.ts
+- [X] T027 [US1] Implement isolated sandboxed Web Worker in src/lib/runner/runner.worker.ts with proxy console logging and exception boundary
+- [X] T028 [US1] Implement WorkerRunnerManager in src/lib/runner/WorkerRunnerManager.ts managing worker lifecycle, timeout timers (2000ms), and worker.terminate() safety cutoff
+- [X] T029 [US1] Implement route handler for problem detail in src/app/api/problems/[slug]/route.ts
+- [X] T030 [P] [US1] Implement Monaco Code Editor component in src/components/editor/MonacoCodeEditor.tsx with JavaScript language mode, dark theme, and code folding
+- [X] T031 [P] [US1] Implement EditorHeader component in src/components/editor/EditorHeader.tsx with Run / Submit triggers and reset button
+- [X] T032 [P] [US1] Implement OutputPanel component in src/components/editor/OutputPanel.tsx rendering tabs for test cases, console output logs, and execution duration
+- [X] T033 [US1] Assemble complete problem workspace in src/app/problems/[slug]/page.tsx connecting editor, worker runner, and output panel
+- [X] T034 Verify all tests pass (`bun test tests/unit/deep-equal.test.ts tests/unit/runner-manager.test.ts tests/contract/problems-api.test.ts`)
+- [X] T035 Spawn review subagent to audit in-browser execution safety, memory leaks in worker lifecycle, and UI responsiveness
+- [X] T036 Execute Phase 3 conventional commit: `feat(runner): implement in-browser Web Worker execution engine and Monaco workspace`
 
 ---
 
